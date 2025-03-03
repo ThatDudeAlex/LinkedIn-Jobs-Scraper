@@ -7,6 +7,6 @@ LOCATORS = {
     "search_button": ".jobs-search-box__submit-button",
     "company": ".artdeco-entity-lockup__subtitle span",
     "pagination_list": ".artdeco-pagination__pages",
-    "pagination_button": lambda page_num: f'[data-test-pagination-page-btn="{page_num}"] button',
+    "pagination_button": lambda page_num: f'[aria-label="Page {page_num}"]',
     "more_pagination_buttons": lambda page_num: f'button[aria-label="Page {page_num}"]'
 }
