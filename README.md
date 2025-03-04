@@ -46,7 +46,7 @@ This was created to streamline job-hunting for specific roles and locations whil
 3. **Install Dependencies**:
 
    ```bash
-   pip install playwright python-dotenv
+   pip install -r requirements.txt
    ```
 
    Then install the required browser binaries:
