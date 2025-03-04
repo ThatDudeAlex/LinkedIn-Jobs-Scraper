@@ -11,6 +11,7 @@ import random
 import logging
 import subprocess
 import time
+import argparse
 
 load_dotenv()
 
@@ -409,12 +410,14 @@ class DatabaseManager:
         return not company
     
 
-class Scraper:
-    def __init__(self):
-        self.logger = self.setup_logging(os.getenv('LOGGING_PATH'))
-        self.browser_manager = BrowserManager(self.logger)
-        self.database_manager = DatabaseManager(self.logger)
+class JobScraper:
+    def __init__(self, args, logger):
+        self.browser_manager = BrowserManager(logger)
+        self.database_manager = DatabaseManager(logger)
         self.page_handler = None
+        self.logger = logger
+        self.job_search = args.job_search
+        self.location = args.location
         self.terms_block_list = os.getenv('TERMS_BLOCKLIST').split(',')
 
     
@@ -428,14 +431,12 @@ class Scraper:
 
         try:
             pagination_page = 1
-            
             await self.page_handler.go_to_url(f"{os.getenv('JOB_SEARCH_BASE_URL')}", 3, 5)
-            await self.page_handler.fill_element(
-                LOCATORS['job_keyword_search'], os.getenv('JOB_SEARCH_KEYWORDS'), "Keyword Input", 2, 4)
+
+            await self.page_handler.fill_element(LOCATORS['job_keyword_search'], self.job_search, "Keyword Input", 2, 4)
             
             location_inputs = await self.page_handler.get_elements(LOCATORS['job_location_search'])
-            await self.page_handler.fill_element(
-                location_inputs[0], os.getenv('JOB_SEARCH_LOCATION'), "Location Input", 2, 4)
+            await self.page_handler.fill_element(location_inputs[0], self.location, "Location Input", 2, 4)
 
             await self.page_handler.click_and_wait(LOCATORS['search_button'], "Search Button")
             
@@ -503,6 +504,7 @@ class Scraper:
                     self.database_manager.add_job(jobid, job_title, company, job_location, job_remote_status, linkedin_url)
 
                 pagination_page += 1
+                await self.page_handler.scroll_element_into_view(LOCATORS['pagination_list'], 'Pagination List')
                 self.logger.debug(f'Looking for pagination btn {pagination_page}')
 
                 try:
@@ -527,43 +529,51 @@ class Scraper:
             await self.browser_manager.playwright.stop()
 
         
-    def setup_logging(self, log_file):
-        """Sets up logging to both console and file"""
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.DEBUG)
-
-        # Create console handler
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.DEBUG)
-
-        # Create console formatter and add it to handler
-        formatter_c = logging.Formatter('%(levelname)s - %(message)s')
-        console_handler.setFormatter(formatter_c)
-        logger.addHandler(console_handler)
-
-        try:
-            # Create file handler
-            file_handler = logging.FileHandler(log_file)
-            file_handler.setLevel(logging.DEBUG)
-        except Exception as e:
-            logger.warning(f'Error creating logger file handler: {e}')
-            return logger
-
-        # Create file formatter and add it to handler
-        formatter_f = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s\n')
-        file_handler.setFormatter(formatter_f)        
-        logger.addHandler(file_handler)
-        
-        return logger
-
-
     def contains_blocked_term(self, job_title):
         """Sets up list of terms for jobs I want to ignore"""
         return any(sub in job_title for sub in self.terms_block_list)
 
 
+def setup_logging(file_path):
+    """Sets up logging to both console and file"""
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
 
-scraper = Scraper()
-asyncio.run(scraper.run())
+    # Create console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG)
+
+    # Create console formatter and add it to handler
+    formatter_c = logging.Formatter('%(levelname)s - %(message)s')
+    console_handler.setFormatter(formatter_c)
+    logger.addHandler(console_handler)
+
+    try:
+        # Create file handler
+        file_handler = logging.FileHandler(file_path)
+        file_handler.setLevel(logging.DEBUG)
+    except Exception as e:
+        logger.warning(f'Error creating logger file handler: {e}')
+        return logger
+
+    # Create file formatter and add it to handler
+    formatter_f = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s\n')
+    file_handler.setFormatter(formatter_f)        
+    logger.addHandler(file_handler)
+    
+    return logger
 
 
+async def main():
+    parser = argparse.ArgumentParser(description="Playwright job scraper")
+    parser.add_argument("-s", "--job_search", required=True, help="Search by title, skill, or company")
+    parser.add_argument("-l", "--location", required=True, help="City, state, or zip code")
+    args = parser.parse_args()
+
+    logger = setup_logging(os.getenv('LOGGING_PATH'))
+
+    scraper = JobScraper(args, logger)
+    await scraper.run()
+
+if __name__ == "__main__":
+    asyncio.run(main())
