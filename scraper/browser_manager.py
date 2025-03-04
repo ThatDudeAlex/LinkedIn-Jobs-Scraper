@@ -4,10 +4,17 @@ import sys
 import os
 import subprocess
 import time
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright, Page, Browser, BrowserContext, Playwright
 
 
 class BrowserManager:
+    logger: logging.Logger
+    browser: Browser
+    context: BrowserContext
+    page: Page
+    chrome_process: subprocess.Popen
+    playwright: Playwright
+
     def __init__(self, logger: logging.Logger):
         self.logger = logger
         self.browser = None
@@ -17,7 +24,7 @@ class BrowserManager:
         self.playwright = None
 
     
-    def get_chrome_profile_path(self):
+    def get_chrome_profile_path(self) -> str:
         if sys.platform == "darwin":  # macOS
             default_path = os.path.expanduser("~/Library/Application Support/Google/Chrome")
         elif sys.platform == "win32":  # Windows
@@ -30,7 +37,7 @@ class BrowserManager:
         return os.getenv("CHROME_PROFILE_PATH", default_path)
     
 
-    def get_chrome_executable_path(self):
+    def get_chrome_executable_path(self) -> str:
         if sys.platform == "darwin":  # macOS
             default_path = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
@@ -55,7 +62,7 @@ class BrowserManager:
         return os.getenv("CHROME_PATH", default_path)
 
 
-    async def connect_to_existing_chrome(self, cdp_url):
+    async def connect_to_existing_chrome(self, cdp_url: str) -> Page:
         """
         Connects to an existing Chrome session via CDP.
         """
@@ -72,7 +79,7 @@ class BrowserManager:
         return self.page
 
 
-    async def start_chrome_with_cdp(self):
+    async def start_chrome_with_cdp(self) -> Page:
         """
         Starts a new Chrome process with a specific user profile and connects Playwright to it
         """
@@ -126,7 +133,7 @@ class BrowserManager:
             raise e
 
 
-    def is_chrome_running(self):
+    def is_chrome_running(self) -> bool:
         """
         Checks if Chrome is already running with CDP enabled.
         """
@@ -143,14 +150,14 @@ class BrowserManager:
             return False
         
 
-    def kill_chrome_process(self):
+    def kill_chrome_process(self) -> None:
         """
         Kills any existing Chrome processes before launching a new one.
         """
         subprocess.run(["pkill", "-f", "Google Chrome"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
-    async def cleanup_context(self):
+    async def cleanup_context(self) -> None:
         """
         Closes extra Playwright pages to free up memory.
         """
@@ -160,7 +167,7 @@ class BrowserManager:
                 await page.close()
 
 
-    async def close_browser(self):
+    async def close_browser(self) -> None:
         """
         Closes the Playwright browser session and kills Chrome if needed.
         """

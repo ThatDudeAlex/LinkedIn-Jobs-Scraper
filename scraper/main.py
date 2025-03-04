@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from .job_scraper import JobScraper
 
 
-def setup_logging(file_path):
+def setup_logging(file_path: str) -> logging.Logger:
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 

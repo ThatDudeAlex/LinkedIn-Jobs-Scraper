@@ -4,6 +4,8 @@ import os
 
 
 class DatabaseManager:
+    logger: logging.Logger
+
     def __init__(self, logger: logging.Logger):
         self.logger = logger
 
@@ -46,7 +48,8 @@ class DatabaseManager:
             raise e
     
 
-    def add_job(self, jobid, title, company, location, remote_status, linkedin_url):
+    def add_job(self, jobid: str, title: str, company: str, location: str,
+                remote_status: str, linkedin_url: str) -> None:
         try:
             with sqlite3.connect(os.getenv('DATABASE_PATH')) as conn:
                 cursor = conn.cursor()
@@ -62,7 +65,7 @@ class DatabaseManager:
             raise e
         
     
-    def add_employer(self, company, state):
+    def add_employer(self, company: str, state: str) -> None:
         try:
             with sqlite3.connect(os.getenv('DATABASE_PATH')) as conn:
                 cursor = conn.cursor()
@@ -78,7 +81,7 @@ class DatabaseManager:
             raise e
 
 
-    def search_jobs(self, search_term):
+    def search_jobs(self, search_term: str) -> None:
         try:
             with sqlite3.connect(os.getenv('DATABASE_PATH')) as conn:
                 cursor = conn.cursor()
@@ -98,7 +101,7 @@ class DatabaseManager:
                 self.logger.info(job)
 
 
-    def is_a_new_job(self, jobid):
+    def is_a_new_job(self, jobid: str) -> bool:
         try:
             with sqlite3.connect(os.getenv('DATABASE_PATH')) as conn:
                 cursor = conn.cursor()
@@ -111,7 +114,7 @@ class DatabaseManager:
         return not job
     
 
-    def is_a_new_employer(self, company):
+    def is_a_new_employer(self, company: str) -> bool:
         try:
             with sqlite3.connect(os.getenv('DATABASE_PATH')) as conn:
                 cursor = conn.cursor()

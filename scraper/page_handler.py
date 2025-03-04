@@ -2,26 +2,30 @@ import logging
 import math
 import random
 import asyncio
-
+from typing import Union, List
+from playwright.async_api import Page, Locator
 
 class PageHandler:
-    def __init__(self, page, logger: logging.Logger):
+    page: Page
+    logger: logging.Logger
+
+    def __init__(self, page: Page, logger: logging.Logger):
         self.page = page
         self.logger = logger
 
 
-    async def go_to_url(self, url, wait_min=3, wait_max=7):
+    async def go_to_url(self, url: str, wait_min: int = 3, wait_max: int = 7) -> None:
         self.logger.info(f"Goto URL: {url}")
         await self.page.goto(url, wait_until="domcontentloaded")
         await self.random_wait(wait_min, wait_max)
 
 
-    async def random_wait(self, wait_min=5, wait_max=12):
+    async def random_wait(self, wait_min: int = 5, wait_max: int = 12) -> None:
         wait_time = math.floor(random.random() * (wait_max - wait_min + 1)) + wait_min
         await asyncio.sleep(wait_time)
 
     
-    async def get_element_text(self, target):
+    async def get_element_text(self, target: Union[str, Locator]) -> Union[str, None]:
         try:
             text_content = ''
 
@@ -35,7 +39,8 @@ class PageHandler:
             return None
     
 
-    async def get_element_property(self, target, property):
+    async def get_element_property(self, target: Union[str, Locator],
+                                   property: str) -> Union[str, None]:
         try:
             if isinstance(target, str):
                 locator = self.page.locator(target)
@@ -47,7 +52,8 @@ class PageHandler:
             return None
 
 
-    async def click_and_wait(self, target, name, wait_min=2, wait_max=4):
+    async def click_and_wait(self, target: Union[str, Locator], name: str,
+                             wait_min: int = 2, wait_max: int = 4) -> None:
         """Clicks target and waits before continuing"""
         try:
             if isinstance(target, str):
@@ -61,7 +67,8 @@ class PageHandler:
             self.logger.warning(f'click_and_wait() Error occurred clicking element: {e}')
 
 
-    async def fill_element(self, target, value, name, wait_min=2, wait_max=4):
+    async def fill_element(self, target: Union[str, Locator], value, name,
+                           wait_min: int = 2, wait_max: int = 4) -> None:
         try:
             """Fills target with text value"""
             if isinstance(target, str):
@@ -76,7 +83,7 @@ class PageHandler:
             self.logger.warning(f"fill_element() Error trying to fill element {name}: {e}")
 
 
-    async def get_elements(self, selector):
+    async def get_elements(self, selector: str) -> Union[List[Locator], None]:
         try:
             return await self.page.locator(selector).all()
         except Exception as e:
@@ -84,7 +91,8 @@ class PageHandler:
             return None
     
     
-    async def scroll_element_into_view(self, target, name, wait_min=2, wait_max=4):
+    async def scroll_element_into_view(self, target: Union[str, Locator], name,
+                                       wait_min: int = 2, wait_max: int = 4) -> None:
         """Scrolls the target element into view"""
         try:
             # Convert Playwright Locator to an ElementHandle if necessary

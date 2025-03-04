@@ -1,5 +1,7 @@
 import os
 import logging
+import argparse
+from typing import List
 from .browser_manager import BrowserManager
 from .database_manager import DatabaseManager
 from .page_handler import PageHandler
@@ -7,7 +9,15 @@ from locators import LOCATORS
 
 
 class JobScraper:
-    def __init__(self, args, logger: logging.Logger):
+    browser_manager: BrowserManager
+    database_manager: DatabaseManager
+    page_handler: PageHandler
+    logger: logging.Logger
+    job_search: str
+    location: str
+    terms_block_list: List[str]
+
+    def __init__(self, args: argparse.Namespace, logger: logging.Logger):
         self.browser_manager = BrowserManager(logger)
         self.database_manager = DatabaseManager(logger)
         self.page_handler = None
@@ -125,6 +135,6 @@ class JobScraper:
             await self.browser_manager.playwright.stop()
 
         
-    def contains_blocked_term(self, job_title):
+    def contains_blocked_term(self, job_title: str) -> bool:
         """Sets up list of terms for jobs I want to ignore"""
         return any(sub in job_title for sub in self.terms_block_list)
