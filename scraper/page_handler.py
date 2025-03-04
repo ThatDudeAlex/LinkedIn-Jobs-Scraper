@@ -6,6 +6,8 @@ from typing import Union, List
 from playwright.async_api import Page, Locator
 
 class PageHandler:
+    """Handles all `url` navigation and `page` interactions"""
+
     page: Page
     logger: logging.Logger
 
@@ -15,17 +17,23 @@ class PageHandler:
 
 
     async def go_to_url(self, url: str, wait_min: int = 3, wait_max: int = 7) -> None:
+        """Navigate to the input `url`"""
+
         self.logger.info(f"Goto URL: {url}")
         await self.page.goto(url, wait_until="domcontentloaded")
         await self.random_wait(wait_min, wait_max)
 
 
     async def random_wait(self, wait_min: int = 5, wait_max: int = 12) -> None:
+        """Waits for a random amount of time between `wait_min` & `wait_max`"""
+
         wait_time = math.floor(random.random() * (wait_max - wait_min + 1)) + wait_min
         await asyncio.sleep(wait_time)
 
     
     async def get_element_text(self, target: Union[str, Locator]) -> Union[str, None]:
+        """Returns the text contents of an `HTML` element"""
+
         try:
             text_content = ''
 
@@ -41,6 +49,8 @@ class PageHandler:
 
     async def get_element_property(self, target: Union[str, Locator],
                                    property: str) -> Union[str, None]:
+        """Returns a `property` of an `HTML` element"""
+
         try:
             if isinstance(target, str):
                 locator = self.page.locator(target)
@@ -55,6 +65,7 @@ class PageHandler:
     async def click_and_wait(self, target: Union[str, Locator], name: str,
                              wait_min: int = 2, wait_max: int = 4) -> None:
         """Clicks target and waits before continuing"""
+
         try:
             if isinstance(target, str):
                 await self.page.locator(target).click()
@@ -71,6 +82,7 @@ class PageHandler:
                            wait_min: int = 2, wait_max: int = 4) -> None:
         try:
             """Fills target with text value"""
+
             if isinstance(target, str):
                 locator = self.page.locator(target)
                 await locator.fill(value)
@@ -84,6 +96,8 @@ class PageHandler:
 
 
     async def get_elements(self, selector: str) -> Union[List[Locator], None]:
+        """Returns all elements matched by the `css selector`"""
+
         try:
             return await self.page.locator(selector).all()
         except Exception as e:

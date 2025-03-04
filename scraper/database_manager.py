@@ -4,6 +4,11 @@ import os
 
 
 class DatabaseManager:
+    """
+    Handles the creation of the `jobs` and `employers` tables. 
+    Also handles the insertion and lookup of database entities
+    """
+
     logger: logging.Logger
 
     def __init__(self, logger: logging.Logger):
@@ -11,6 +16,9 @@ class DatabaseManager:
 
 
     def create_database(self):
+        """
+        Creates the `jobs` and `employers` table if they don't exist
+        """
         try:
             with sqlite3.connect(os.getenv('DATABASE_PATH')) as conn:
                 cursor = conn.cursor()
@@ -50,6 +58,9 @@ class DatabaseManager:
 
     def add_job(self, jobid: str, title: str, company: str, location: str,
                 remote_status: str, linkedin_url: str) -> None:
+        """
+        Adds a new job entity into the `jobs` table
+        """
         try:
             with sqlite3.connect(os.getenv('DATABASE_PATH')) as conn:
                 cursor = conn.cursor()
@@ -66,6 +77,9 @@ class DatabaseManager:
         
     
     def add_employer(self, company: str, state: str) -> None:
+        """
+        Adds a new employer entity into the `employers` table
+        """
         try:
             with sqlite3.connect(os.getenv('DATABASE_PATH')) as conn:
                 cursor = conn.cursor()
@@ -82,6 +96,9 @@ class DatabaseManager:
 
 
     def search_jobs(self, search_term: str) -> None:
+        """
+        Logs all jobs that contain the `search_term` in any of it's fields
+        """
         try:
             with sqlite3.connect(os.getenv('DATABASE_PATH')) as conn:
                 cursor = conn.cursor()
@@ -102,6 +119,9 @@ class DatabaseManager:
 
 
     def is_a_new_job(self, jobid: str) -> bool:
+        """
+        Returns if `jobid` is not found in the `jobs` table
+        """
         try:
             with sqlite3.connect(os.getenv('DATABASE_PATH')) as conn:
                 cursor = conn.cursor()
@@ -115,6 +135,9 @@ class DatabaseManager:
     
 
     def is_a_new_employer(self, company: str) -> bool:
+        """
+        Returns if `company` is not found in the `employers` table
+        """
         try:
             with sqlite3.connect(os.getenv('DATABASE_PATH')) as conn:
                 cursor = conn.cursor()

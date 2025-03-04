@@ -9,6 +9,8 @@ from locators import LOCATORS
 
 
 class JobScraper:
+    """Handles the automation of scraping job listings from LinkedIn"""
+
     browser_manager: BrowserManager
     database_manager: DatabaseManager
     page_handler: PageHandler
@@ -28,6 +30,9 @@ class JobScraper:
 
     
     async def run(self):
+        """
+        Starts the job scraper, connects to Chrome, and iterates through job listings
+        """
         # Makes sure the db is always created before running
         self.database_manager.create_database()
         self.page = await self.browser_manager.start_chrome_with_cdp()
@@ -136,5 +141,7 @@ class JobScraper:
 
         
     def contains_blocked_term(self, job_title: str) -> bool:
-        """Sets up list of terms for jobs I want to ignore"""
+        """
+        Returns if input string contains an element in the term block list as a substring
+        """
         return any(sub in job_title for sub in self.terms_block_list)

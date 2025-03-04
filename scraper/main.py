@@ -7,6 +7,10 @@ from .job_scraper import JobScraper
 
 
 def setup_logging(file_path: str) -> logging.Logger:
+    """
+    Sets up & returns a logger with handlers for both the console 
+    and the file in `file_path`
+    """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 

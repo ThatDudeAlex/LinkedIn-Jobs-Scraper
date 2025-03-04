@@ -8,6 +8,8 @@ from playwright.async_api import async_playwright, Page, Browser, BrowserContext
 
 
 class BrowserManager:
+    """Handles browser connections and closing"""
+
     logger: logging.Logger
     browser: Browser
     context: BrowserContext
@@ -64,7 +66,7 @@ class BrowserManager:
 
     async def connect_to_existing_chrome(self, cdp_url: str) -> Page:
         """
-        Connects to an existing Chrome session via CDP.
+        Connects to an existing Chrome session via CDP
         """
         self.playwright = await async_playwright().start()
         self.browser = await self.playwright.chromium.connect_over_cdp(cdp_url)
@@ -135,7 +137,7 @@ class BrowserManager:
 
     def is_chrome_running(self) -> bool:
         """
-        Checks if Chrome is already running with CDP enabled.
+        Checks if Chrome is already running with CDP enabled
         """
         cdp_url = os.getenv('CDP_URL', 'http://127.0.0.1:9222')
         host, port = cdp_url.replace("http://", "").split(":")
@@ -152,14 +154,14 @@ class BrowserManager:
 
     def kill_chrome_process(self) -> None:
         """
-        Kills any existing Chrome processes before launching a new one.
+        Kills any existing Chrome processes before launching a new one
         """
         subprocess.run(["pkill", "-f", "Google Chrome"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
     async def cleanup_context(self) -> None:
         """
-        Closes extra Playwright pages to free up memory.
+        Closes extra Playwright pages to free up memory
         """
         if len(await self.context.pages()) > 5:
             self.logger.info("🧹 Closing extra pages to free up memory...")
@@ -169,7 +171,7 @@ class BrowserManager:
 
     async def close_browser(self) -> None:
         """
-        Closes the Playwright browser session and kills Chrome if needed.
+        Closes the Playwright browser session and kills Chrome if needed
         """
         if self.browser:
             await self.browser.close()
