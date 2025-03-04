@@ -11,6 +11,12 @@ def setup_logging(file_path: str) -> logging.Logger:
     Sets up & returns a logger with handlers for both the console 
     and the file in `file_path`
     """
+
+    # Creates log directory if it doesn't exist
+    log_dir = os.path.dirname(file_path)
+    os.makedirs(log_dir, exist_ok=True)
+
+    # Initiate logger
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
