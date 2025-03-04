@@ -33,8 +33,6 @@ class JobScraper:
         """
         Starts the job scraper, connects to Chrome, and iterates through job listings
         """
-        # Makes sure the db is always created before running
-        self.database_manager.create_database()
         self.page = await self.browser_manager.start_chrome_with_cdp()
         self.page_handler = PageHandler(self.page, self.logger)
 
@@ -79,9 +77,8 @@ class JobScraper:
                     company = await self.page_handler.get_element_text(company_locator)
                     self.logger.debug(f'Got Company Name: {company}')
 
-                    is_new_company = self.database_manager.is_a_new_employer(company)
-                    if is_new_company:
-                        self.database_manager.add_employer(company, os.getenv('STATE'))
+                    # Adds company to employer table if it's a new one
+                    self.database_manager.add_employer(company, os.getenv('STATE'))
 
                     title_locator = card.locator(LOCATORS['job_title'])
                     job_title = await self.page_handler.get_element_text(title_locator)
@@ -132,12 +129,13 @@ class JobScraper:
                 
                 if pagination_page % 5 == 0:
                     os.system('clear')
-                # await self.browser_manager.cleanup_context()
+                
         except Exception as e:
             self.logger.critical('Error occurred {e}')
         finally:
             await self.browser_manager.close_browser()
             await self.browser_manager.playwright.stop()
+            self.database_manager.close()
 
         
     def contains_blocked_term(self, job_title: str) -> bool:
