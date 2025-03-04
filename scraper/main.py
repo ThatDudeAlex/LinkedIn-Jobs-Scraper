@@ -30,7 +30,7 @@ def setup_logging(file_path: str) -> logging.Logger:
     # File handler
     try:
         file_handler = logging.FileHandler(file_path)
-        file_handler.setLevel(logging.DEBUG)
+        file_handler.setLevel(logging.ERROR) # Log only errors in file
         formatter_f = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s\n')
         file_handler.setFormatter(formatter_f)
         logger.addHandler(file_handler)
